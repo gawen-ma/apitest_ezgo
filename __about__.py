@@ -1,0 +1,8 @@
+__title__ = 'NSFastHttp'
+__description__ = 'fast http interface test frame'
+__url__ = ''
+__version__ = '0.0.1'
+__author__ = 'mawengang'
+__author_email__ = 'mawengang@intra.nsfocus.com'
+__license__ = 'Apache-2.0'
+__copyright__ = 'Copyright 2017 mawengang'
