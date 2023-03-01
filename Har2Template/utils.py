@@ -2,9 +2,8 @@ import io
 import json
 import logging
 import sys
-
 import yaml
-from NSFastHttp.Har2Template.compat import bytes, ensure_ascii, str, unquote
+from apitest_ezgo.Har2Template.compat import bytes, ensure_ascii, str, unquote
 
 
 def load_har_log_entries(file_path):

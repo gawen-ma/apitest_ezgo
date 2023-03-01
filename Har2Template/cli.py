@@ -6,9 +6,9 @@ import argparse
 import logging
 import sys
 
-from NSFastHttp.__about__ import __description__, __version__
+from apitest_ezgo.__about__ import __description__, __version__
 
-from NSFastHttp.Har2Template.core import HarParser
+from apitest_ezgo.Har2Template.core import HarParser
 
 
 def get_version():

@@ -1,0 +1,17 @@
+[project]
+name = "apitest_ezgo"
+version = "0.0.1"
+authors = [
+  { name="Gawen", email="502286126@qq.com" },
+]
+description = "fast http interface test frame"
+readme = "README.md"
+requires-python = ">=2.7"
+classifiers = [
+    "Programming Language :: Python :: 2",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+# [project.urls]
+#
