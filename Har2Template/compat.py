@@ -36,7 +36,7 @@ if is_py2:
     import urlparse
     from urllib import unquote
 
-    ensure_ascii = True
+    ensure_ascii = False
     builtin_str = str
     bytes = str
     str = (unicode, bytes)

@@ -42,7 +42,7 @@ def load_req_info(file_path):
 
 
 class FastRequest(object):
-    def __init__(self, template_path, base_url="", session=None):
+    def __init__(self, template_path="", base_url="", session=None):
         """
         Http对象
         @param template_path: json请求模板文件根目录
@@ -62,16 +62,17 @@ class FastRequest(object):
 
     def fast_request(self, file_path, request_name, resp_jpath=None, session=None, replace_dict=None):
         """
-
-        @param file_path: json文件相对路径，相对于template_path
+        支持各类请求方式各类content-type的请求入口
+        @param file_path: json文件路径，可为相对于template_path的相对路径
         @param request_name: json文件中请求的名称，即字典名称
-        @param resp_jpath: 需要提前响应数据的jsonpath
+        @param resp_jpath: 需要提取响应数据的jsonpath
         @param session: 支持临时session请求，不传默认使用实例session
         @param replace_dict:需要更新请求参数，传入对应jpath 和 值，如果需要将某个参数从请求中删除，将值更新为{REMOVE}
                             例如{"$.headers.User-Agent": "new agent", "$..sec-ch-ua": '{REMOVE}'}
         @return: 传入resp_jpath取对应数据，默认返回响应对象
         """
-        req_info = load_req_info(os.path.join(self.template_path, file_path)).get(request_name)
+        path = os.path.join(self.template_path, file_path) if self.template_path else file_path
+        req_info = load_req_info(path).get(request_name)
         replace_dict = replace_dict if replace_dict else {}
         if self.base_url:
             replace_dict.update({"$.host": self.base_url})
@@ -87,6 +88,3 @@ class FastRequest(object):
         return jsonpath(resp.json(), resp_jpath)[0] if resp_jpath else resp
 
 
-if __name__ == '__main__':
-    client = FastRequest(template_path="E:\PyCode\FastHttp\Template")
-    print client.fast_request("fanyi.baidu.com.json", "/abdr", resp_jpath="$.data")

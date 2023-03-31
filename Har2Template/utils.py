@@ -126,8 +126,3 @@ def dump_json(testcase, json_file):
         outfile.write(my_json_str)
 
     logging.info("Generate JSON testcase successfully: {}".format(json_file))
-
-
-
-if __name__ == '__main__':
-    load_har_log_entries("E:\\PyCode\\test2.har")

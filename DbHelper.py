@@ -106,10 +106,10 @@ class SqLHelper(object):
         """
         self.db = DbConnectionPool(creator, db_config)  # 从数据池中获取连接
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, 'inst'):  # 单例
-            cls.inst = super(SqLHelper, cls).__new__(cls, *args, **kwargs)
-        return cls.inst
+    # def __new__(cls, *args, **kwargs):
+    #     if not hasattr(cls, 'inst'):  # 单例
+    #         cls.inst = super(SqLHelper, cls).__new__(cls, *args, **kwargs)
+    #     return cls.inst
 
     # 封装执行命令
     def execute(self, sql, param=None, autoclose=False):

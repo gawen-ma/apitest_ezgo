@@ -41,7 +41,7 @@ class HarParser(object):
         self.filter_str = filter_str
         self.exclude_str = exclude_str or ""
 
-    def __make_request_url(self, path, requst_dict, entry_json):
+    def __make_request_url(self, name, path, requst_dict, entry_json):
         """ parse HAR entry request url and queryString, and make requst url and params
 
         Args:
@@ -70,7 +70,7 @@ class HarParser(object):
         request_params = utils.convert_list_to_dict(
             entry_json["request"].get("queryString", [])
         )
-        requst_dict[path]["path"] = path
+        requst_dict[name]["path"] = path
         full_url = entry_json["request"].get("url")
         if not full_url:
             logging.exception("url missed in request.")
@@ -80,13 +80,13 @@ class HarParser(object):
         if request_params:
             parsed_object = parsed_object._replace(query='')
             url = parsed_object.geturl()
-            requst_dict[path]["params"] = request_params
+            requst_dict[name]["params"] = request_params
         else:
             url = full_url
-        requst_dict[path]["host"] = url.replace(path, "")
+        requst_dict[name]["host"] = url.replace(path, "")
 
 
-    def __make_request_method(self, path, requst_dict, entry_json):
+    def __make_request_method(self, name, requst_dict, entry_json):
         """ parse HAR entry request method, and make requst method.
         """
         method = entry_json["request"].get("method")
@@ -94,9 +94,9 @@ class HarParser(object):
             logging.exception("method missed in request.")
             sys.exit(1)
 
-        requst_dict[path]["method"] = method
+        requst_dict[name]["method"] = method
 
-    def __make_request_headers(self, path, requst_dict, entry_json):
+    def __make_request_headers(self, name, requst_dict, entry_json):
         """ parse HAR entry request headers, and make requst headers.
             header in IGNORE_REQUEST_HEADERS will be ignored.
         """
@@ -108,9 +108,9 @@ class HarParser(object):
             requst_headers[header["name"]] = header["value"]
 
         if requst_headers:
-            requst_dict[path]["headers"] = requst_headers
+            requst_dict[name]["headers"] = requst_headers
 
-    def _make_request_data(self, path, requst_dict, entry_json):
+    def _make_request_data(self, name, requst_dict, entry_json):
         """ parse HAR entry request data, and make requst request data
         """
         method = entry_json["request"].get("method")
@@ -140,7 +140,7 @@ class HarParser(object):
                 # TODO: make compatible with more mimeType
                 pass
 
-            requst_dict[path][request_data_key] = post_data
+            requst_dict[name][request_data_key] = post_data
 
     def _prepare_requst(self, entry_json):
         """ extract info from entry dict and make requst
@@ -152,13 +152,14 @@ class HarParser(object):
 
         parsed_object = urlparse.urlparse(url)
         path = parsed_object.path
+        name = entry_json["request"].get("method") + "_" + path
         requst_dict = {
-            path: {},
+            name: {},
         }
-        self.__make_request_url(path, requst_dict, entry_json)
-        self.__make_request_method(path, requst_dict, entry_json)
-        self.__make_request_headers(path, requst_dict, entry_json)
-        self._make_request_data(path, requst_dict, entry_json)
+        self.__make_request_url(name, path, requst_dict, entry_json)
+        self.__make_request_method(name, requst_dict, entry_json)
+        self.__make_request_headers(name, requst_dict, entry_json)
+        self._make_request_data(name, requst_dict, entry_json)
 
         return requst_dict
 

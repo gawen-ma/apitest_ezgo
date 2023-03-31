@@ -31,10 +31,7 @@ def main():
                             help=u"dest_file_path： 目的文件路径，默认har所在路径")
 
     args = parser.parse_args()
-    print (args)
-    if args.version:
-        print("{}".format(__version__))
-        exit(0)
+    # print (args)
 
     har_source_file = args.har_source_file
     if not har_source_file or not har_source_file.endswith(".har"):
@@ -47,7 +44,11 @@ def main():
     ).gen_template()
     return 0
 
+def test(har_source_file, dest_file_path):
+    HarParser(
+        har_source_file, dest_file_path
+    ).gen_template()
+
 
 if __name__ == '__main__':
-    sys.argv = ['cli.py', 'new', '-h']
-    main()
+    test(r"C:\Users\nsfocus\Desktop\units.har", ".")
