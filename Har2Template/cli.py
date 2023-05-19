@@ -22,7 +22,7 @@ def main():
     parser.add_argument('-v', '--version', action='version', version=get_version(), help='show version')
 
     subparsers = parser.add_subparsers(help="")
-    sub_parser = subparsers.add_parser("new", help=u"""usage: NSFastHttp  [-s] har_source_file  [-d] dest_file_path
+    sub_parser = subparsers.add_parser("new", help=u"""usage: apitest_ezgo new  [-s] har_source_file  [-d] dest_file_path
                                             egg: NSFastHttp new demo.har .
                                             har_source_file： har文件所在路径,当前路径下的demo.har;
                                             dest_file_path: 目的文件路径，.表示当前路径""")
@@ -31,18 +31,18 @@ def main():
                             help=u"dest_file_path： 目的文件路径，默认har所在路径")
 
     args = parser.parse_args()
-    # print (args)
 
     har_source_file = args.har_source_file
     if not har_source_file or not har_source_file.endswith(".har"):
         logging.error("HAR file not specified.")
         sys.exit(1)
-    print args
+    print(args)
 
     HarParser(
         har_source_file, args.dest_file_path
     ).gen_template()
     return 0
+
 
 def test(har_source_file, dest_file_path):
     HarParser(
@@ -51,4 +51,4 @@ def test(har_source_file, dest_file_path):
 
 
 if __name__ == '__main__':
-    test(r"C:\Users\nsfocus\Desktop\units.har", ".")
+    test(r"C:\Users\nsfocus\Desktop\import2.har", ".")

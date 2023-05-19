@@ -3,6 +3,8 @@
 @date: 2023/2/23
 @author: mawengang
 """
+import traceback
+from robot.api import logger
 from DBUtils.PooledDB import PooledDB
 
 
@@ -104,6 +106,7 @@ class SqLHelper(object):
             "cursor_factory": psycopg2.extras.RealDictCursor
         }
         """
+        self.cursor_factory = db_config.get("cursor_factory", None)
         self.db = DbConnectionPool(creator, db_config)  # 从数据池中获取连接
 
     # def __new__(cls, *args, **kwargs):
@@ -122,6 +125,8 @@ class SqLHelper(object):
         """
         cursor, conn = self.db.get_conn()  # 从连接池获取连接
         count = 0
+        logger.info(u"执行sql为： %s" % sql)
+        logger.info(u"执行sql 参数为： %s" % param)
         try:
             # count : 为改变的数据条数
             if param:
@@ -132,7 +137,8 @@ class SqLHelper(object):
             if autoclose:
                 self.close(cursor, conn)
         except Exception as e:
-            pass
+            traceback.print_exc()
+            # logger.warn(traceback.format_exc(e))
         return cursor, conn, count
 
     # 执行多条命令
@@ -142,10 +148,13 @@ class SqLHelper(object):
         :return:
         """
         cursor, conn = self.db.get_conn()
+
         try:
             for order in lis:
                 sql = order['sql']
                 param = order['param']
+                logger.info(u"执行sql为： %s" % sql)
+                logger.info(u"执行sql 参数为： %s" % param)
                 if param:
                     cursor.execute(sql, param)
                 else:
@@ -155,6 +164,7 @@ class SqLHelper(object):
             return True
         except Exception as e:
             print(e)
+            traceback.print_exc()
             conn.rollback()
             self.close(cursor, conn)
             return False
@@ -167,31 +177,37 @@ class SqLHelper(object):
 
     # 查询所有， 应该是最常用的了
     def select_all(self, sql, param=None):
+        cursor, conn, count = self.execute(sql, param)
         try:
-            cursor, conn, count = self.execute(sql, param)
             res = cursor.fetchall()
-            return res
+            print(res)
+            if self.cursor_factory and res:
+                res = [dict(i) for i in res]
+            return [] if res == 0 else res
         except Exception as e:
             print(e)
+            traceback.print_exc()
             self.close(cursor, conn)
-            return count
+            return [] if self.cursor_factory else count
 
     # 查询单条
     def select_one(self, sql, param=None):
+        cursor, conn, count = self.execute(sql, param)
         try:
-            cursor, conn, count = self.execute(sql, param)
             res = cursor.fetchone()
             self.close(cursor, conn)
+            if self.cursor_factory and res:
+                return [dict(i) for i in res]
             return res
         except Exception as e:
             print("error_msg:", e.args)
             self.close(cursor, conn)
-            return count
+            return [] if self.cursor_factory else count
 
     # 增加
     def insert_one(self, sql, param):
+        cursor, conn, count = self.execute(sql, param)
         try:
-            cursor, conn, count = self.execute(sql, param)
             # _id = cursor.lastrowid()  # 获取当前插入数据的主键id，该id应该为自动生成为好
             conn.commit()
             self.close(cursor, conn)
@@ -226,8 +242,8 @@ class SqLHelper(object):
 
     # 删除
     def delete(self, sql, param=None):
+        cursor, conn, count = self.execute(sql, param)
         try:
-            cursor, conn, count = self.execute(sql, param)
             self.close(cursor, conn)
             return count
         except Exception as e:
@@ -238,8 +254,8 @@ class SqLHelper(object):
 
     # 更新
     def update(self, sql, param=None):
+        cursor, conn, count = self.execute(sql, param)
         try:
-            cursor, conn, count = self.execute(sql, param)
             conn.commit()
             self.close(cursor, conn)
             return count
@@ -251,22 +267,22 @@ class SqLHelper(object):
 
 
 if __name__ == '__main__':
-    pass
-    # import psycopg2
-    # import psycopg2.extras
-    # db_conf = {
-    #     "host": '10.66.241.19',
-    #     "port": '5434',
-    #     "user": 'postgres',
-    #     "password": 'login@123',
-    #     "database": 'scanner',
-    #     "cursor_factory": psycopg2.extras.RealDictCursor
-    # }
-    # db = SqLHelper(creator=psycopg2, **db_conf)
-    # # 查询单条
-    # sql1 = 'SELECT x.* FROM public.rule_item x WHERE x.rule_type IN (5) AND x.match_type IN (0)'
-    # ret = db.select_all(sql=sql1)
-    # print(ret)
+    # pass
+    import psycopg2
+    import psycopg2.extras
+    db_conf = {
+        "host": '10.xx.xx.xx',
+        "port": '',
+        "user": '',
+        "password": '',
+        "database": '',
+        "cursor_factory": psycopg2.extras.RealDictCursor
+    }
+    db = SqLHelper(creator=psycopg2, **db_conf)
+    # 查询单条
+    sql1 = 'SELECT x.* FROM public.rule_item x WHERE x.rule_type IN (5) AND x.match_type IN (0)'
+    ret = db.select_all(sql=sql1)
+    print(ret)
     # 增加单条
     # sql2 = 'insert into userinfo (name,password) VALUES (%s,%s)'
     # ret = db.insertone(sql2, ('old2','22222'))

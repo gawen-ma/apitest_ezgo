@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-httprunner.compat
-~~~~~~~~~~~~~~~~~
 
 This module handles import compatibility issues between Python 2 and
 Python 3.
@@ -39,7 +37,7 @@ if is_py2:
     ensure_ascii = False
     builtin_str = str
     bytes = str
-    str = (unicode, bytes)
+    str = (str, unicode, bytes)
     basestring = basestring
     numeric_types = (int, long, float)
     integer_types = (int, long)
@@ -47,6 +45,7 @@ if is_py2:
 elif is_py3:
     import urllib.parse as urlparse
     from urllib.parse import unquote
+
     ensure_ascii = False
     builtin_str = str
     str = str

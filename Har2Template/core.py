@@ -1,12 +1,13 @@
 # coding=utf-8
-import base64
 import json
 import logging
 import os
 import sys
 
+import jsonpath
+
 import utils
-from compat import urlparse
+from apitest_ezgo.compat import urlparse
 
 try:
     from json.decoder import JSONDecodeError
@@ -15,13 +16,13 @@ except ImportError:
 
 IGNORE_REQUEST_HEADERS = [
     "host",
-    "accept",
+    # "accept",
     "content-length",
     "connection",
-    "accept-encoding",
-    "accept-language",
+    # "accept-encoding",
+    # "accept-language",
     "origin",
-    "referer",
+    # "referer",
     "cache-control",
     "pragma",
     "cookie",
@@ -136,6 +137,12 @@ class HarParser(object):
                     pass
             elif mimeType.startswith("application/x-www-form-urlencoded"):
                 post_data = utils.convert_x_www_form_urlencoded_to_dict(post_data)
+            elif mimeType.startswith('multipart/form-data'):
+                try:
+                    content_type = jsonpath.jsonpath(requst_dict, "$..Content-Type")[0]
+                    post_data = utils.convert_form_data_to_dict(post_data, content_type)
+                except JSONDecodeError:
+                    pass
             else:
                 # TODO: make compatible with more mimeType
                 pass

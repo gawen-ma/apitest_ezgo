@@ -2,6 +2,8 @@
 import json
 import logging
 import jsonpath
+from apitest_ezgo.compat import str, builtin_str
+from datetime import datetime, date
 from deepdiff import DeepDiff
 from tabulate import tabulate
 
@@ -40,13 +42,13 @@ def jpath2path(json_obj, japths):
     elif isinstance(japths, set):
         japths = list(japths)
     elif not isinstance(japths, (list, tuple)):
-        logging.warning("jsonpath 参数格式不正确，多个使用列表，元组，或可使用英文逗号分割的字符串")
+        logging.warning(u"jsonpath 参数格式不正确，多个使用列表，元组，或可使用英文逗号分割的字符串")
     paths = []
     for jpath in japths:
         _paths = jsonpath.jsonpath(json_obj, jpath.strip(), result_type='PATH')
         if not _paths:
-            logging.warning("使用jsonpath: {jpath} 无法中获取到值，请检查jsonpath是否正确! json对象: {json_obj} ".format(jpath=jpath,
-                                                                                                      json_obj=json_obj))
+            # logging.warning(u"使用jsonpath: {jpath} 无法中获取到值，请检查jsonpath是否正确! json对象: {json_obj} ".
+            #                 format(jpath=jpath, json_obj=json.dumps(json_obj, ensure_ascii=False)))
             continue
         paths.extend([path.replace("$", "root") for path in _paths])
     return paths
@@ -63,10 +65,11 @@ def table_log_result(diff_res):
         diff_values = []
         for item in diff_res.items():
             for i in item:
-                if isinstance(i, set):
+                if not isinstance(i, str):
                     for ele in list(i):
                         diff_values.append([ele.report_type, ele.t1, ele.t2, ele])
         logging.warning(tabulate(diff_values, headers=header, tablefmt='grid'))
+        raise ValueError("结果比对失败")
 
 
 def values_format(obj, significant_digits):
@@ -77,18 +80,19 @@ def values_format(obj, significant_digits):
         for k, v in obj.items():
             if v in ("", None):
                 obj[k] = ""
-            elif isinstance(v, (str, unicode)):
+            elif isinstance(v, str):
                 try:
                     v = json.loads(v)
                     obj[k] = values_format(v, significant_digits)
                 except Exception:
-                    obj[k] = str(v)
+                    obj[k] = builtin_str(v)
             elif isinstance(v, (int, float)):
                 obj[k] = round(v, significant_digits)
+            elif isinstance(v, (datetime, date)):
+                obj[k] = v.strftime('%Y-%m-%d %H:%M:%S')
             else:
                 obj[k] = values_format(v, significant_digits)
     return obj
-
 
 
 if __name__ == '__main__':
